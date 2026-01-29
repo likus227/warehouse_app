@@ -1,11 +1,20 @@
 version: '3.8'
 
 services:
-  flask-app:
+  web:
     build: .
+    container_name: warehouse_bhp
     ports:
-      - "5000:5000"
-    volumes:
-      - .:/app
+      - "80:5000"  # Mapowanie portu 80 (HTTP) na 5000 (Flask)
     environment:
-      - FLASK_ENV=development
+      - FLASK_ENV=production
+      - SECRET_KEY=zmien-to-na-produkcji-$(openssl rand -hex 32)
+    volumes:
+      - ./instance:/app/instance  # Persystencja bazy danych
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
