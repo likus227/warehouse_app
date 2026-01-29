@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Panel główny - System BHP{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    <h3 class="text-3xl font-bold leading-7 text-gray-900">
+        <i class="fas fa-tachometer-alt mr-2"></i>Panel główny
+    </h3>
+    <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        Witaj, {{ g.user.imie }} {{ g.user.nazwisko }}! 
+        <span class="font-medium">({{ g.user.rola.value }})</span>
+    </p>
+</div>
+
+{% if g.user.rola.value in ['Administrator', 'Kierownik'] %}
+<!-- Statystyki dla administratora i kierownika -->
+<div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-shopping-cart text-3xl text-blue-500"></i>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="truncate text-sm font-medium text-gray-500">Nowe zamówienia</dt>
+                        <dd class="text-3xl font-semibold text-gray-900">{{ stats.zamowienia_nowe }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <a href="{{ url_for('orders.customer_orders_list', status='NOWE') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">
+                Zobacz wszystkie <span aria-hidden="true">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-tasks text-3xl text-yellow-500"></i>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="truncate text-sm font-medium text-gray-500">W realizacji</dt>
+                        <dd class="text-3xl font-semibold text-gray-900">{{ stats.zamowienia_w_realizacji }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <a href="{{ url_for('orders.customer_orders_list') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">
+                Zobacz wszystkie <span aria-hidden="true">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="truncate text-sm font-medium text-gray-500">Niskie stany</dt>
+                        <dd class="text-3xl font-semibold text-gray-900">{{ stats.produkty_niski_stan }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <a href="{{ url_for('reports.inventory_report', tylko_niskie='on') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">
+                Zobacz produkty <span aria-hidden="true">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-chart-line text-3xl text-green-500"></i>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="truncate text-sm font-medium text-gray-500">Sprzedaż (miesiąc)</dt>
+                        <dd class="text-2xl font-semibold text-gray-900">{{ "%.2f"|format(stats.sprzedaz_miesiac) }} zł</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+            <a href="{{ url_for('reports.sales_report') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">
+                Zobacz raport <span aria-hidden="true">&rarr;</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Szybkie akcje -->
+<div class="mt-8">
+    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">
+        <i class="fas fa-bolt mr-2"></i>Szybkie akcje
+    </h3>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% if g.user.rola.value in ['Sprzedawca', 'Administrator'] %}
+        <a href="{{ url_for('orders.customer_order_add') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-plus-circle text-2xl text-indigo-600"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span class="absolute inset-0"></span>
+                    <p class="text-sm font-medium text-gray-900">Nowe zamówienie klienta</p>
+                    <p class="truncate text-sm text-gray-500">Utwórz zamówienie sprzedaży</p>
+                </div>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if g.user.rola.value in ['Magazynier', 'Administrator'] %}
+        <a href="{{ url_for('warehouse.pz_add') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-truck-loading text-2xl text-green-600"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span class="absolute inset-0"></span>
+                    <p class="text-sm font-medium text-gray-900">Przyjęcie towaru (PZ)</p>
+                    <p class="truncate text-sm text-gray-500">Zarejestruj dostawę</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('warehouse.wz_add') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-dolly text-2xl text-orange-600"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span class="absolute inset-0"></span>
+                    <p class="text-sm font-medium text-gray-900">Wydanie towaru (WZ)</p>
+                    <p class="truncate text-sm text-gray-500">Wydaj towar z magazynu</p>
+                </div>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if g.user.rola.value in ['Kierownik', 'Administrator'] %}
+        <a href="{{ url_for('orders.supplier_order_add') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-file-invoice text-2xl text-purple-600"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span class="absolute inset-0"></span>
+                    <p class="text-sm font-medium text-gray-900">Zamówienie do dostawcy</p>
+                    <p class="truncate text-sm text-gray-500">Złóż zamówienie zakupu</p>
+                </div>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if g.user.rola.value == 'Administrator' %}
+        <a href="{{ url_for('products.add') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-box-open text-2xl text-blue-600"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span class="absolute inset-0"></span>
+                    <p class="text-sm font-medium text-gray-900">Nowy produkt</p>
+                    <p class="truncate text-sm text-gray-500">Dodaj produkt do katalogu</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('main.user_add') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400 hover:shadow-md">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-user-plus text-2xl text-teal-600"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span class="absolute inset-0"></span>
+                    <p class="text-sm font-medium text-gray-900">Nowy użytkownik</p>
+                    <p class="truncate text-sm text-gray-500">Dodaj użytkownika systemu</p>
+                </div>
+            </div>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

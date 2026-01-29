@@ -1,58 +1,31 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
-import os
-import re
-from dotenv import load_dotenv
+from config import Config
+from app.models import db
+from flask_migrate import Migrate
 
-load_dotenv()
+migrate = Migrate()
 
-class Base(DeclarativeBase):
-    pass
-
-db = SQLAlchemy(model_class=Base)
-
-def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
     
-    database_url = os.getenv('DATABASE_URL')
-    
-    if database_url:
-        database_url = re.sub(r'^postgresql:', 'postgresql+psycopg2:', database_url)
-    else:
-        database_url = f"sqlite:///{os.path.join(app.instance_path, 'flaskr.sqlite')}"
-    
-    app.config.from_mapping(
-        SECRET_KEY=os.getenv('SECRET_KEY', 'dev'),
-        SQLALCHEMY_DATABASE_URI=database_url,
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    )
-
-    if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        app.config.from_mapping(test_config)
-
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
+    # Inicjalizacja rozszerzeń
     db.init_app(app)
-
-    from models import user  # Import models to register them with SQLAlchemy
-
+    migrate.init_app(app, db)
+    
+    # Rejestracja blueprintów
+    from app.routes import auth, main, products, warehouse, orders, reports, customers
+    
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(main.bp)
+    app.register_blueprint(products.bp)
+    app.register_blueprint(warehouse.bp)
+    app.register_blueprint(orders.bp)
+    app.register_blueprint(reports.bp)
+    app.register_blueprint(customers.bp)
+    
+    # Tworzenie tabel w bazie danych
     with app.app_context():
         db.create_all()
-
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
     
-    @app.route('/')
-    def index():
-        return 'Flask App Running!'
-
     return app
-
-

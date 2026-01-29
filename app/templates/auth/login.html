@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pl" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logowanie - System BHP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full">
+    <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="text-center">
+                <i class="fas fa-warehouse text-6xl text-indigo-600"></i>
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+                System Magazynowy BHP
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Zaloguj się do systemu
+            </p>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="rounded-md p-4 mb-4 {% if category == 'danger' %}bg-red-50 border border-red-200{% else %}bg-blue-50 border border-blue-200{% endif %}">
+                                <p class="text-sm {% if category == 'danger' %}text-red-700{% else %}text-blue-700{% endif %}">
+                                    {{ message }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form class="space-y-6" action="{{ url_for('auth.login') }}" method="POST">
+                    <div>
+                        <label for="login" class="block text-sm font-medium text-gray-700">Login</label>
+                        <div class="mt-1">
+                            <input id="login" name="login" type="text" required 
+                                   class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="haslo" class="block text-sm font-medium text-gray-700">Hasło</label>
+                        <div class="mt-1">
+                            <input id="haslo" name="haslo" type="password" required 
+                                   class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" 
+                                class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Zaloguj się
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="bg-white px-2 text-gray-500">Domyślne konta testowe</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 space-y-1">
+                        <p><strong>Admin:</strong> admin / admin123</p>
+                        <p><strong>Magazynier:</strong> magazyn / magazyn123</p>
+                        <p><strong>Sprzedawca:</strong> sprzedaz / sprzedaz123</p>
+                        <p><strong>Kierownik:</strong> kierownik / kierownik123</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</body>
+</html>
