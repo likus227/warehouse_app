@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Zamówienie {{ zamowienie.numer }} - System BHP{% endblock %}
+{% block content %}
+<div class="px-4 sm:px-0">
+    <h3 class="text-3xl font-bold text-gray-900">Zamówienie zakupu: {{ zamowienie.numer }}</h3>
+    <p class="text-sm text-gray-500 mt-1">Status: <span class="font-semibold">{{ zamowienie.status.value }}</span></p>
+</div>
+
+<div class="mt-6 bg-white shadow rounded-lg p-6">
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
+        <div>
+            <h4 class="text-lg font-medium text-gray-900 mb-2">Dostawca</h4>
+            <p class="text-sm text-gray-700">{{ zamowienie.dostawca.nazwa }}</p>
+            <p class="text-sm text-gray-500">{{ zamowienie.dostawca.telefon }}</p>
+            <p class="text-sm text-gray-500">{{ zamowienie.dostawca.email }}</p>
+        </div>
+        <div>
+            <h4 class="text-lg font-medium text-gray-900 mb-2">Informacje</h4>
+            <p class="text-sm"><strong>Data zamówienia:</strong> {{ zamowienie.data_zamowienia.strftime('%Y-%m-%d') }}</p>
+            {% if zamowienie.data_dostawy_planowana %}
+            <p class="text-sm"><strong>Planowana dostawa:</strong> {{ zamowienie.data_dostawy_planowana.strftime('%Y-%m-%d') }}</p>
+            {% endif %}
+            <p class="text-sm"><strong>Wartość:</strong> {{ "%.2f"|format(zamowienie.wartosc_netto) }} zł</p>
+        </div>
+    </div>
+
+    <h4 class="text-lg font-medium text-gray-900 mb-4">Pozycje</h4>
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Produkt</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Ilość</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Cena jedn.</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Wartość</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for poz in zamowienie.pozycje %}
+            <tr>
+                <td class="px-4 py-2 text-sm">{{ poz.produkt_rel.kod }} - {{ poz.produkt_rel.nazwa }}</td>
+                <td class="px-4 py-2 text-sm">{{ poz.ilosc }}</td>
+                <td class="px-4 py-2 text-sm">{{ "%.2f"|format(poz.cena_jednostkowa) }} zł</td>
+                <td class="px-4 py-2 text-sm">{{ "%.2f"|format(poz.wartosc_netto) }} zł</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
