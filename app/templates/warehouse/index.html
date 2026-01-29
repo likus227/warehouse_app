@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Magazyn - System BHP{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    <h3 class="text-3xl font-bold leading-7 text-gray-900">
+        <i class="fas fa-warehouse mr-2"></i>Magazyn
+    </h3>
+    <p class="mt-1 max-w-2xl text-sm text-gray-500">Zarządzanie stanami magazynowymi</p>
+</div>
+
+<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <a href="{{ url_for('warehouse.pz_add') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400">
+        <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+                <i class="fas fa-truck-loading text-2xl text-green-600"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-900">Przyjęcie towaru (PZ)</p>
+                <p class="text-sm text-gray-500">Zarejestruj dostawę</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="{{ url_for('warehouse.wz_add') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400">
+        <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+                <i class="fas fa-dolly text-2xl text-orange-600"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-900">Wydanie towaru (WZ)</p>
+                <p class="text-sm text-gray-500">Wydaj towar z magazynu</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="{{ url_for('warehouse.documents_list') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-indigo-400">
+        <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+                <i class="fas fa-file-alt text-2xl text-blue-600"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-900">Dokumenty</p>
+                <p class="text-sm text-gray-500">Przeglądaj PZ/WZ</p>
+            </div>
+        </div>
+    </a>
+</div>
+
+{% if niskie_stany %}
+<div class="mt-8">
+    <h4 class="text-lg font-medium text-gray-900 mb-4">
+        <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>Produkty o niskim stanie
+    </h4>
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Kod</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Nazwa</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Stan</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Min</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+                {% for stan in niskie_stany %}
+                <tr>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ stan.produkt.kod }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">{{ stan.produkt.nazwa }}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold text-red-800">
+                            {{ stan.ilosc_dostepna }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ stan.produkt.stan_minimalny }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Dokument PZ - System BHP{% endblock %}
+{% block content %}
+<div class="px-4 sm:px-0">
+    <h3 class="text-3xl font-bold text-gray-900">Dokument PZ: {{ dokument.numer }}</h3>
+    <p class="text-sm text-gray-500 mt-1">Data: {{ dokument.data_wystawienia.strftime('%Y-%m-%d %H:%M') }}</p>
+</div>
+<div class="mt-6 bg-white shadow rounded-lg p-6">
+    <div class="mb-6">
+        <h4 class="text-lg font-medium text-gray-900 mb-2">Informacje</h4>
+        <p><strong>Dostawca:</strong> {{ dokument.dostawca_rel.nazwa if dokument.dostawca_rel else 'Brak' }}</p>
+        {% if dokument.uwagi %}<p><strong>Uwagi:</strong> {{ dokument.uwagi }}</p>{% endif %}
+    </div>
+    <h4 class="text-lg font-medium text-gray-900 mb-4">Pozycje</h4>
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Produkt</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Ilość</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for poz in dokument.pozycje %}
+            <tr>
+                <td class="px-4 py-2 text-sm">{{ poz.produkt.kod }} - {{ poz.produkt.nazwa }}</td>
+                <td class="px-4 py-2 text-sm">{{ poz.ilosc }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
