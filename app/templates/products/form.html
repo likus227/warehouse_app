@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{% if produkt %}Edycja{% else %}Dodawanie{% endif %} produktu{% endblock %}
+{% block content %}
+<div class="px-4 sm:px-0">
+    <h3 class="text-3xl font-bold text-gray-900">{% if produkt %}Edycja{% else %}Dodawanie{% endif %} produktu</h3>
+</div>
+<div class="mt-6 bg-white shadow rounded-lg p-6">
+    <form method="POST" class="space-y-6">
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Kod</label>
+                <input type="text" name="kod" value="{{ produkt.kod if produkt else '' }}" {% if produkt %}readonly{% endif %} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Kategoria</label>
+                <input type="text" name="kategoria" value="{{ produkt.kategoria if produkt else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            </div>
+            <div class="col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Nazwa</label>
+                <input type="text" name="nazwa" value="{{ produkt.nazwa if produkt else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Jednostka</label>
+                <input type="text" name="jednostka" value="{{ produkt.jednostka if produkt else 'szt' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Cena jednostkowa</label>
+                <input type="number" name="cena_jednostkowa" value="{{ produkt.cena_jednostkowa if produkt else '' }}" step="0.01" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Stan minimalny</label>
+                <input type="number" name="stan_minimalny" value="{{ produkt.stan_minimalny if produkt else '10' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Lokalizacja</label>
+                <input type="text" name="lokalizacja" value="{{ produkt.stan_magazynowy.lokalizacja if produkt and produkt.stan_magazynowy else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            </div>
+            <div class="col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Opis</label>
+                <textarea name="opis" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ produkt.opis if produkt else '' }}</textarea>
+            </div>
+        </div>
+        {% if produkt %}
+        <div class="flex items-center">
+            <input type="checkbox" name="aktywny" {% if produkt.aktywny %}checked{% endif %} class="h-4 w-4 rounded border-gray-300">
+            <label class="ml-2 text-sm text-gray-900">Aktywny</label>
+        </div>
+        {% endif %}
+        <div class="flex justify-end space-x-3">
+            <a href="{{ url_for('products.list') }}" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300">Anuluj</a>
+            <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">Zapisz</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

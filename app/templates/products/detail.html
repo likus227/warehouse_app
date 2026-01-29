@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ produkt.nazwa }}{% endblock %}
+{% block content %}
+<div class="px-4 sm:px-0">
+    <h3 class="text-3xl font-bold text-gray-900">{{ produkt.nazwa }}</h3>
+    <p class="text-sm text-gray-500">Kod: {{ produkt.kod }}</p>
+</div>
+<div class="mt-6 bg-white shadow rounded-lg p-6">
+    <dl class="grid grid-cols-2 gap-4">
+        <div>
+            <dt class="text-sm font-medium text-gray-500">Kategoria</dt>
+            <dd class="mt-1 text-sm text-gray-900">{{ produkt.kategoria }}</dd>
+        </div>
+        <div>
+            <dt class="text-sm font-medium text-gray-500">Cena</dt>
+            <dd class="mt-1 text-sm text-gray-900">{{ "%.2f"|format(produkt.cena_jednostkowa) }} zł/{{ produkt.jednostka }}</dd>
+        </div>
+        <div>
+            <dt class="text-sm font-medium text-gray-500">Stan magazynowy</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+                {% if produkt.stan_magazynowy %}
+                {{ produkt.stan_magazynowy.ilosc_dostepna }} {{ produkt.jednostka }}
+                {% else %}
+                Brak danych
+                {% endif %}
+            </dd>
+        </div>
+        <div>
+            <dt class="text-sm font-medium text-gray-500">Lokalizacja</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+                {% if produkt.stan_magazynowy %}
+                {{ produkt.stan_magazynowy.lokalizacja }}
+                {% else %}
+                -
+                {% endif %}
+            </dd>
+        </div>
+    </dl>
+    <div class="mt-6">
+        <a href="{{ url_for('products.edit', produkt_id=produkt.id) }}" class="inline-flex rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">Edytuj</a>
+    </div>
+</div>
+{% endblock %}

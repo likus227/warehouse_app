@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Wystawianie faktury{% endblock %}
+{% block content %}
+<div class="px-4 sm:px-0">
+    <h3 class="text-3xl font-bold text-gray-900">Wystawianie faktury</h3>
+</div>
+<div class="mt-6 bg-white shadow rounded-lg p-6">
+    <div class="mb-6">
+        <h4 class="text-lg font-medium text-gray-900 mb-2">Zamówienie: {{ zamowienie.numer }}</h4>
+        <p class="text-sm text-gray-600">Klient: {{ zamowienie.klient.nazwa }}</p>
+        <p class="text-sm text-gray-600">Wartość: {{ "%.2f"|format(zamowienie.wartosc_brutto) }} zł</p>
+    </div>
+    <form method="POST">
+        <div class="flex justify-end space-x-3">
+            <a href="{{ url_for('orders.customer_order_detail', zamowienie_id=zamowienie.id) }}" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300">Anuluj</a>
+            <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">Wystaw fakturę</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

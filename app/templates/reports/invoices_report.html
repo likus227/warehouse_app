@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Raport faktur{% endblock %}
+{% block content %}
+<div class="px-4 sm:px-0">
+    <h3 class="text-3xl font-bold text-gray-900">Raport faktur</h3>
+</div>
+<div class="mt-6 bg-white shadow rounded-lg p-6">
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-sm text-blue-600">Liczba faktur</p>
+            <p class="text-2xl font-bold">{{ liczba_faktur }}</p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+            <p class="text-sm text-green-600">Suma netto</p>
+            <p class="text-2xl font-bold">{{ "%.2f"|format(suma_netto) }} zł</p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg">
+            <p class="text-sm text-purple-600">Suma brutto</p>
+            <p class="text-2xl font-bold">{{ "%.2f"|format(suma_brutto) }} zł</p>
+        </div>
+    </div>
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Numer</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Klient</th>
+                <th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Wartość</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for f in faktury %}
+            <tr>
+                <td class="px-4 py-2 text-sm">{{ f.numer }}</td>
+                <td class="px-4 py-2 text-sm">{{ f.klient.nazwa }}</td>
+                <td class="px-4 py-2 text-sm">{{ "%.2f"|format(f.wartosc_brutto) }} zł</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
