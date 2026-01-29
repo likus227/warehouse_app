@@ -187,10 +187,11 @@ class Zamowienie(db.Model):
     
     def oblicz_wartosc(self):
         """Oblicza wartość zamówienia na podstawie pozycji"""
+        from decimal import Decimal
         netto = sum(p.wartosc_netto for p in self.pozycje)
         self.wartosc_netto = netto
-        self.wartosc_brutto = netto * 1.23  # VAT 23%
-    
+        self.wartosc_brutto = netto * Decimal('1.23')
+        
     def zmien_status(self, nowy_status):
         """Zmienia status zamówienia"""
         self.status = nowy_status
