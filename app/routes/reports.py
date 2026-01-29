@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, g
 from app.models import (db, Zamowienie, StanMagazynowy, Produkt, Faktura, 
-                        DokumentMagazynowy, TypDokumentu)
+                        DokumentMagazynowy, TypDokumentu, PozycjaZamowienia)
 from app.routes.auth import login_required, role_required
 from datetime import datetime, timedelta
-from sqlalchemy import func, extract
+from sqlalchemy import func
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
 
@@ -42,22 +42,25 @@ def sales_report():
     suma_brutto = sum(z.wartosc_brutto or 0 for z in zamowienia)
     liczba_zamowien = len(zamowienia)
     
-    # Sprzedaż według kategorii
-    sprzedaz_kategorie = db.session.query(
-        Produkt.kategoria,
-        func.sum(db.cast(db.literal_column('pozycja_zamowienia.wartosc_netto'), db.Numeric)).label('wartosc')
-    ).join(
-        db.literal_column('pozycja_zamowienia'), 
-        Produkt.id == db.literal_column('pozycja_zamowienia.produkt_id')
-    ).join(
-        db.literal_column('pozycje_zamowienia'),
-        db.literal_column('pozycja_zamowienia.id') == db.literal_column('pozycje_zamowienia.pozycja_id')
-    ).join(
-        Zamowienie,
-        Zamowienie.id == db.literal_column('pozycje_zamowienia.zamowienie_id')
-    ).filter(
-        Zamowienie.data_zamowienia.between(dt_od, dt_do)
-    ).group_by(Produkt.kategoria).all()
+    # Sprzedaż według kategorii - uproszczone
+    sprzedaz_kategorie = []
+    try:
+        # Pobierz wszystkie pozycje zamówień z danego okresu
+        for zamowienie in zamowienia:
+            for pozycja in zamowienie.pozycje:
+                kategoria = pozycja.produkt_rel.kategoria if pozycja.produkt_rel else 'Brak'
+                # Znajdź lub dodaj kategorię
+                found = False
+                for item in sprzedaz_kategorie:
+                    if item[0] == kategoria:
+                        item[1] += float(pozycja.wartosc_netto or 0)
+                        found = True
+                        break
+                if not found:
+                    sprzedaz_kategorie.append([kategoria, float(pozycja.wartosc_netto or 0)])
+    except Exception as e:
+        print(f"Błąd przy kategorii: {e}")
+        sprzedaz_kategorie = []
     
     return render_template('reports/sales_report.html',
                          zamowienia=zamowienia,
@@ -88,7 +91,7 @@ def inventory_report():
     
     # Wartość magazynu
     wartosc_magazynu = sum(
-        s.ilosc_dostepna * s.produkt.cena_jednostkowa 
+        float(s.ilosc_dostepna) * float(s.produkt.cena_jednostkowa) 
         for s in stany
     )
     
@@ -120,27 +123,40 @@ def product_rotation():
     dt_od = datetime.strptime(data_od, '%Y-%m-%d')
     dt_do = datetime.strptime(data_do, '%Y-%m-%d')
     
-    # Produkty z ilością sprzedaży
-    produkty_rotacja = db.session.query(
-        Produkt,
-        func.coalesce(func.sum(db.literal_column('pozycja_zamowienia.ilosc')), 0).label('ilosc_sprzedana')
-    ).outerjoin(
-        db.literal_column('pozycja_zamowienia'),
-        Produkt.id == db.literal_column('pozycja_zamowienia.produkt_id')
-    ).outerjoin(
-        db.literal_column('pozycje_zamowienia'),
-        db.literal_column('pozycja_zamowienia.id') == db.literal_column('pozycje_zamowienia.pozycja_id')
-    ).outerjoin(
-        Zamowienie,
-        Zamowienie.id == db.literal_column('pozycje_zamowienia.zamowienie_id')
-    ).filter(
-        db.or_(
-            Zamowienie.data_zamowienia.between(dt_od, dt_do),
-            Zamowienie.data_zamowienia.is_(None)
-        )
-    ).group_by(Produkt.id).order_by(
-        func.sum(db.literal_column('pozycja_zamowienia.ilosc')).desc()
+    # Uproszczone zapytanie - zbieramy dane ręcznie
+    produkty_rotacja = []
+    
+    # Pobierz wszystkie zamówienia z okresu
+    zamowienia = Zamowienie.query.filter(
+        Zamowienie.data_zamowienia.between(dt_od, dt_do)
     ).all()
+    
+    # Zlicz sprzedaż dla każdego produktu
+    sprzedaz_dict = {}
+    for zamowienie in zamowienia:
+        for pozycja in zamowienie.pozycje:
+            produkt_id = pozycja.produkt_id
+            if produkt_id not in sprzedaz_dict:
+                sprzedaz_dict[produkt_id] = {
+                    'produkt': pozycja.produkt_rel,
+                    'ilosc': 0
+                }
+            sprzedaz_dict[produkt_id]['ilosc'] += pozycja.ilosc
+    
+    # Konwertuj do listy i sortuj
+    produkty_rotacja = [
+        (data['produkt'], data['ilosc']) 
+        for data in sprzedaz_dict.values()
+    ]
+    produkty_rotacja.sort(key=lambda x: x[1], reverse=True)
+    
+    # Dodaj produkty które nie były sprzedawane
+    wszystkie_produkty = Produkt.query.filter_by(aktywny=True).all()
+    sprzedane_ids = set(sprzedaz_dict.keys())
+    
+    for produkt in wszystkie_produkty:
+        if produkt.id not in sprzedane_ids:
+            produkty_rotacja.append((produkt, 0))
     
     return render_template('reports/product_rotation.html',
                          produkty_rotacja=produkty_rotacja,
